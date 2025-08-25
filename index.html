@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>이야기 만들기 게임</title>
+
+  <!-- Google Fonts: 본문은 Noto Sans KR, 제목/버튼은 Jua -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* 파스텔 톤 */
+      --bg1: #fff7f5;
+      --bg2: #f5fbff;
+      --bg3: #f7faff;
+      --fg: #0f172a;
+      --muted: #6b7280;
+      --bord: #e5e7eb;
+      --accent1: #7c5cff; /* 보라 */
+      --accent2: #44c3ff; /* 하늘 */
+      --accent3: #5be4ac; /* 민트 */
+      --card: #ffffff;
+      --pill: #f9fafb;
+      --warn: #fef3c7;
+      --warn-b: #fde68a;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--fg);
+      font: 16px/1.6 "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+
+      /* 부드러운 그라디언트 배경 */
+      background:
+        radial-gradient(1200px 600px at 10% 0%, var(--bg2) 0%, transparent 60%),
+        radial-gradient(1000px 500px at 100% 10%, var(--bg3) 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg1), #ffffff);
+
+      /* 매우 연한 별/점 패턴 */
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient( circle 3px, rgba(124,92,255,0.12) 40%, transparent 41%) 20px 40px / 120px 120px no-repeat,
+        radial-gradient( circle 2px, rgba(91,228,172,0.10) 40%, transparent 41%) 80px 10px / 140px 140px no-repeat,
+        radial-gradient( circle 2px, rgba(68,195,255,0.10) 40%, transparent 41%) 40px 90px / 100px 100px no-repeat;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-family: "Jua", "Noto Sans KR", sans-serif;
+      font-size: 28px;
+      margin: 0 0 18px;
+      letter-spacing: 0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    h1 .badge {
+      font-size: 20px;
+      background: #fff;
+      border: 1px solid var(--bord);
+      color: var(--accent1);
+      padding: 2px 10px;
+      border-radius: 999px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.06);
+    }
+
+    h2 {
+      font-family: "Jua", "Noto Sans KR", sans-serif;
+      font-size: 18px;
+      margin: 0 0 12px;
+      letter-spacing: 0.2px;
+      color: #1f2937;
+    }
+
+    .card {
+      border: 1px solid var(--bord);
+      border-radius: 20px;
+      padding: 16px;
+      background: var(--card);
+      margin-bottom: 20px;
+      box-shadow:
+        0 2px 10px rgba(124,92,255,0.06),
+        0 1px 2px rgba(0,0,0,.04);
+    }
+
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 820px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+    label.small { font-size: 13px; color: #374151; }
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--bord);
+      border-radius: 14px;
+      font: inherit;
+      background: #fff;
+    }
+    input[type="checkbox"] { width: 18px; height: 18px; }
+
+    .btn {
+      font-family: "Jua", "Noto Sans KR", sans-serif;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--bord);
+      background: #fff;
+      cursor: pointer;
+      transition: transform .05s ease, box-shadow .15s ease, opacity .15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .btn:active { transform: translateY(0); }
+
+    .btn.primary {
+      border: none;
+      color: #fff;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    }
+    .btn.primary:hover {
+      background: linear-gradient(90deg, var(--accent2), var(--accent3));
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .muted { color: var(--muted); font-size: 13px; }
+    .pill { background: var(--pill); padding: 10px; border-radius: 14px; font-size: 14px; }
+    .warn { background: var(--warn); border: 1px solid var(--warn-b); border-radius: 14px; padding: 10px; }
+    details summary { cursor: pointer; }
+    .hidden { display: none !important; }
+    .mono { font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; }
+    .storybox { white-space: pre-wrap; background: #f9fafb; border: 1px solid var(--bord); border-radius: 14px; padding: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📖 이야기 만들기 게임 <span class="badge"></h1>
+    </header>
+
+    <section id="options" class="card">
+      <h2>⚙️ 설정</h2>
+      <div class="grid grid-2">
+        <div>
+          <label class="small">만들 문장 수</label>
+          <input id="turns" type="number" min="3" max="20" value="6" />
+        </div>
+        <div class="row" style="margin-top:10px">
+          <label class="row"><input id="useMissions" type="checkbox" checked /> <span class="small">미션 단어 사용</span></label>
+          <label class="row"><input id="enforceMissions" type="checkbox" /> <span class="small">미션 단어 반드시 포함</span></label>
+        </div>
+        <div class="row">
+          <label class="row"><input id="useTimer" type="checkbox" /> <span class="small">타이머 사용(한 문장당)</span></label>
+          <div class="row">
+            <span id="timeLabel" class="small muted">시간(초)</span>
+            <input id="timeLimit" type="number" min="5" max="120" value="20" style="width:90px" disabled />
+          </div>
+        </div>
+      </div>
+      <button id="startBtn" class="btn primary" style="margin-top:10px">게임 시작</button>
+    </section>
+
+    <section id="play" class="card hidden">
+      <div class="row" style="justify-content:space-between">
+        <h2>이야기 만드는 중</h2>
+        <div class="muted"><span id="turnNow">0</span> / <span id="turnTotal">0</span> 문장</div>
+      </div>
+
+      <div class="pill" style="margin-bottom:10px">
+        <div class="small" style="font-weight:600">시작 문장</div>
+        <div id="firstLine"></div>
+      </div>
+
+      <details id="sofarWrap" class="hidden" style="margin:10px 0">
+        <summary class="small muted">지금까지의 이야기 보기</summary>
+        <div id="sofar" class="storybox mono" style="margin-top:8px"></div>
+      </details>
+
+      <div id="missionWrap" class="warn hidden" style="display:flex;justify-content:space-between;align-items:center;margin:10px 0">
+        <div>
+          <div class="small">이번 문장 미션 단어</div>
+          <div id="mission" style="font-weight:700;font-size:18px">(없음)</div>
+        </div>
+        <button id="reroll" class="btn">다른 미션 단어 뽑기</button>
+      </div>
+
+      <div style="margin:10px 0">
+        <label class="small" style="font-weight:600"><span id="turnLabel">1</span>번째 문장을 이어주세요</label>
+        <input id="inputLine" type="text" placeholder="문장을 입력하세요" />
+        <div id="error" class="small" style="color:#dc2626;margin-top:4px;display:none"></div>
+      </div>
+
+      <div class="row">
+        <button id="submit" class="btn primary">제출</button>
+        <button id="reset" class="btn">처음으로 돌아가기</button>
+        <div id="timerBox" class="muted hidden" style="margin-left:auto;">⏱ 남은 시간: <b id="timeLeft">0s</b></div>
+      </div>
+    </section>
+
+    <section id="done" class="card hidden">
+      <h2>🎉 최종 완성된 이야기</h2>
+      <div id="finalStory" class="storybox mono"></div>
+      <div class="row" style="margin-top:10px">
+        <button id="copy" class="btn">복사하기</button>
+        <button id="restart" class="btn primary">다시 시작</button>
+      </div>
+    </section>
+
+    <details class="card">
+      <summary class="small" style="font-weight:600">도움말 & 수업 팁</summary>
+      <ul style="margin-top:8px;padding-left:20px">
+        <li>모둠 활동으로 진행한다면, 만들 문장 수는 모둠 인원에 맞춰 조정하세요. (예: 4명 → 8문장 만들기, 한 문장씩 두 바퀴)</li>
+        <li>'미션 단어 반드시 포함'을 체크 하면 미션 단어를 반드시 사용해서 문장을 만들어야 해요. (난이도 ↑)</li>
+        <li>타이머를 켜면 제한 시간 안에 문장을 완성해야 해요. 시간 초과 시 자동으로 “(패스)”가 들어갑니다. (난이도 ↑)</li>
+        <li>완성본을 복사해 띵커벨이나 패들렛에 공유해보세요.</li>
+        <li>주인공은 ㅇㅇ, 장소는 ㅇㅇ, 사건은 ㅇㅇ 등의 설정을 주고 시작할 수 있어요.</li>
+      </ul>
+    </details>
+  </div>
+
+  <script>
+    /* 이하 스크립트는 기능 그대로 (네 파일 기준) — 시각만 변경 */
+    const startSentences = [
+      "옛날에 숲 속에 이상한 소리가 들려왔습니다.",
+      "한 소년이 낡은 지도를 발견했습니다.",
+      "깊은 바닷속에서 반짝이는 무언가가 빛났습니다.",
+      "하늘에서 갑자기 알 수 없는 편지가 떨어졌습니다.",
+      "달빛이 비추는 밤, 작은 마을에 이상한 발자국이 나타났습니다.",
+      "바람이 불던 날, 교실 창문 밖으로 종이비행기가 날아왔습니다.",
+      "낡은 서랍 속에서 오래된 편지가 나타났습니다.",
+      "학교 뒤뜰에서 정체를 알 수 없는 커다란 발자국이 이어져 있었습니다.",
+      "깊은 숲 속에서 이상한 빛을 내는 돌이 발견되었습니다."
+    ];
+    const missionWords = [
+      "달","용","비밀","지도","바람","번개","버섯","호수",
+      "로봇","우정","약속","모험","심부름","열쇠","꿈","노래",
+      "해님","구름","다리","신호등","도서관","체육","과학실",
+      "그림자", "우주", "괴물", "보물", "숲", "별", "연필"
+    ];
+
+    let totalTurns = 6;
+    let useMissions = true;
+    let enforceMissions = false;
+    let useTimer = false;
+    let timeLimit = 20;
+
+    let started = false;
+    let finished = false;
+    let story = [];
+    let turn = 0;
+    let mission = null;
+    let timerId = null;
+    let timeLeft = timeLimit;
+
+    const el = (id) => document.getElementById(id);
+    const $options = el("options");
+    const $play = el("play");
+    const $done = el("done");
+    const $turns = el("turns");
+    const $useMissions = el("useMissions");
+    const $enforceMissions = el("enforceMissions");
+    const $useTimer = el("useTimer");
+    const $timeLimit = el("timeLimit");
+    const $turnNow = el("turnNow");
+    const $turnTotal = el("turnTotal");
+    const $firstLine = el("firstLine");
+    const $sofarWrap = el("sofarWrap");
+    const $sofar = el("sofar");
+    const $missionWrap = el("missionWrap");
+    const $mission = el("mission");
+    const $reroll = el("reroll");
+    const $turnLabel = el("turnLabel");
+    const $inputLine = el("inputLine");
+    const $error = el("error");
+    const $timerBox = el("timerBox");
+    const $timeLeft = el("timeLeft");
+    const $startBtn = el("startBtn");
+    const $submit = el("submit");
+    const $reset = el("reset");
+    const $copy = el("copy");
+    const $restart = el("restart");
+    const $timerLabel = el("timeLabel");
+    const $finalStory = el("finalStory");
+
+    function randPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function getStoryText(){ return story.join("\n"); }
+    function setHidden(node, hidden){
+      node.classList.toggle("hidden", !!hidden);
+      node.style.display = hidden ? "none" : "";
+    }
+    function clearTimer(){ if (timerId) { clearInterval(timerId); timerId = null; } }
+
+    $useTimer.addEventListener("change", () => {
+      useTimer = $useTimer.checked;
+      $timeLimit.disabled = !useTimer;
+      $timerLabel.classList.toggle("muted", !useTimer);
+    });
+    $useMissions.addEventListener("change", () => {
+      useMissions = $useMissions.checked;
+      $enforceMissions.disabled = !useMissions;
+      if (!useMissions) { $enforceMissions.checked = false; enforceMissions = false; }
+    });
+    $enforceMissions.addEventListener("change", () => { enforceMissions = $enforceMissions.checked; });
+    $turns.addEventListener("input", () => {
+      const n = Math.max(3, Math.min(20, Number($turns.value)||0));
+      $turns.value = n; totalTurns = n;
+    });
+    $timeLimit.addEventListener("input", () => {
+      const n = Math.max(5, Math.min(120, Number($timeLimit.value)||0));
+      $timeLimit.value = n; timeLimit = n;
+    });
+
+    function startGame(){
+      totalTurns = Math.max(3, Math.min(20, Number($turns.value)||6));
+      useMissions = $useMissions.checked;
+      enforceMissions = $enforceMissions.checked && useMissions;
+      useTimer = $useTimer.checked;
+      timeLimit = Math.max(5, Math.min(120, Number($timeLimit.value)||20));
+
+      started = true; finished = false; story = []; turn = 1; mission = null;
+      clearTimer(); timeLeft = timeLimit;
+
+      const first = randPick(startSentences);
+      story.push(first);
+
+      if (useMissions) { mission = randPick(missionWords); }
+
+      $firstLine.textContent = story[0];
+      $turnTotal.textContent = totalTurns;
+      $turnNow.textContent = turn;
+      $turnLabel.textContent = turn;
+      $inputLine.value = "";
+      $inputLine.placeholder = useMissions && mission ? `예: 오늘 밤 ${mission}에 관한 비밀이…` : "문장을 입력하세요";
+      $error.style.display = "none";
+      setHidden($options, true);
+      setHidden($play, false);
+      setHidden($done, true);
+      setHidden($sofarWrap, true);
+
+      if (useMissions){ setHidden($missionWrap, false); $mission.textContent = mission; }
+      else { setHidden($missionWrap, true); }
+
+      if (useTimer){ setHidden($timerBox, false); startTimer(); }
+      else { setHidden($timerBox, true); }
+
+      setTimeout(()=> $inputLine.focus(), 0);
+    }
+
+    function startTimer(){
+      clearTimer();
+      timeLeft = timeLimit;
+      $timeLeft.textContent = timeLeft + "s";
+      timerId = setInterval(() => {
+        timeLeft -= 1;
+        $timeLeft.textContent = timeLeft + "s";
+        if (timeLeft <= 0){
+          clearTimer();
+          handleSubmit({autoPass:true});
+        }
+      }, 1000);
+    }
+
+    function handleSubmit({autoPass=false}={}){
+      if (!started || finished) return;
+      const trimmed = ($inputLine.value || "").trim();
+      const candidate = autoPass ? "(패스)" : (trimmed.length===0 ? "(빈 문장)" : trimmed);
+
+      if (useMissions && enforceMissions && mission){
+        const ok = candidate.includes(mission);
+        if (!ok && !autoPass){
+          $error.textContent = `이번 문장에는 반드시 "${mission}"(이)가 들어가야 해요.`;
+          $error.style.display = "block";
+          return;
+        }
+      }
+
+      story.push(candidate);
+      $inputLine.value = "";
+      $error.style.display = "none";
+
+      if (turn >= totalTurns){
+        finishGame();
+        return;
+      }
+
+      turn += 1;
+      $turnNow.textContent = turn;
+      $turnLabel.textContent = turn;
+
+      if (useMissions){
+        mission = randPick(missionWords);
+        $mission.textContent = mission;
+        $inputLine.placeholder = `예: 오늘 밤 ${mission}에 관한 비밀이…`;
+      } else {
+        mission = null;
+        $inputLine.placeholder = "문장을 입력하세요";
+      }
+
+      $sofar.textContent = getStoryText();
+      setHidden($sofarWrap, story.length <= 1);
+
+      if (useTimer){
+        setHidden($timerBox, false);
+        startTimer();
+      } else {
+        setHidden($timerBox, true);
+      }
+      $inputLine.focus();
+    }
+
+    function finishGame(){
+      finished = true;
+      started = false;
+      clearTimer();
+      setHidden($play, true);
+      setHidden($done, false);
+      setHidden($timerBox, true);
+      $finalStory.textContent = getStoryText();
+    }
+
+    function resetGame(){
+      started = false; finished = false; story = []; turn = 0; mission = null;
+      clearTimer();
+      setHidden($play, true);
+      setHidden($done, true);
+      setHidden($options, false);
+    }
+
+    function copyToClipboard(){
+      const text = getStoryText();
+      if (!text){ alert("복사할 내용이 없어요."); return; }
+      if (navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(text).then(
+          () => alert("이야기를 클립보드에 복사했어요!"),
+          () => fallbackCopy(text)
+        );
+      } else {
+        fallbackCopy(text);
+      }
+    }
+    function fallbackCopy(text){
+      try{
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position="fixed"; ta.style.opacity="0"; ta.style.top="-1000px";
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (ok) alert("이야기를 클립보드에 복사했어요!");
+        else alert("복사에 실패했어요. 텍스트를 드래그하여 직접 복사해 주세요.");
+      }catch(e){
+        alert("복사에 실패했어요. 텍스트를 드래그하여 직접 복사해 주세요.");
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", startGame);
+    document.getElementById("submit").addEventListener("click", () => handleSubmit());
+    document.getElementById("reset").addEventListener("click", resetGame);
+    document.getElementById("reroll").addEventListener("click", () => {
+      if (useMissions){
+        mission = randPick(missionWords);
+        document.getElementById("mission").textContent = mission;
+        document.getElementById("inputLine").placeholder = `예: 오늘 밤 ${mission}에 관한 비밀이…`;
+      }
+    });
+    document.getElementById("inputLine").addEventListener("keydown", (e) => { if (e.key === "Enter") handleSubmit(); });
+    document.getElementById("copy").addEventListener("click", copyToClipboard);
+    document.getElementById("restart").addEventListener("click", startGame);
+  </script>
+</body>
+</html>
